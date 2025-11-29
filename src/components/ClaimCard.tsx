@@ -115,16 +115,29 @@ export default function ClaimCard({ data }: ClaimCardProps) {
             marginBottom: '0.75rem',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
-            fontWeight: '600'
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'inline', verticalAlign: 'middle' }}>
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
               <line x1="12" y1="22.08" x2="12" y2="12"></line>
             </svg>
-            Sources
+            Verified Sources
+            <span style={{
+              background: 'var(--accent)',
+              color: 'white',
+              padding: '0.125rem 0.5rem',
+              borderRadius: '1rem',
+              fontSize: '0.7rem',
+              fontWeight: 'bold'
+            }}>
+              {data.sources.length}
+            </span>
           </h4>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
             {data.sources.map((source, index) => {
               const isTrusted = /gov|org|reuters|apnews|bbc|who|un\.org/.test(source.url);
               return (
@@ -135,33 +148,49 @@ export default function ClaimCard({ data }: ClaimCardProps) {
                   rel="noopener noreferrer"
                   className="text-sm"
                   style={{
-                    color: 'var(--accent)',
+                    color: 'var(--text-primary)',
                     textDecoration: 'none',
-                    padding: '0.25rem 0.75rem',
-                    background: 'rgba(59, 130, 246, 0.1)',
+                    padding: '0.75rem 1rem',
+                    background: 'var(--surface-highlight)',
                     borderRadius: '0.5rem',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                    border: isTrusted ? '1px solid var(--success)' : '1px solid var(--border)',
                     transition: 'all 0.2s ease',
-                    display: 'inline-flex',
+                    display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    justifyContent: 'space-between',
+                    gap: '0.75rem'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                    e.currentTarget.style.borderColor = 'var(--accent)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
-                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.background = 'var(--surface-highlight)';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                    e.currentTarget.style.borderColor = isTrusted ? 'var(--success)' : 'var(--border)';
                   }}
                 >
-                  {source.name}
-                  {isTrusted && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--success)" stroke="none" style={{ marginLeft: '2px' }}>
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                  )}
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                    {isTrusted && (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--success)" stroke="none">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                      </svg>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', marginBottom: '0.125rem' }}>{source.name}</div>
+                      <div style={{
+                        fontSize: '0.7rem',
+                        color: 'var(--text-muted)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {source.url}
+                      </div>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                     <polyline points="15 3 21 3 21 9"></polyline>
                     <line x1="10" y1="14" x2="21" y2="3"></line>

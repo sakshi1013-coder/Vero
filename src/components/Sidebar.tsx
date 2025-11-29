@@ -21,8 +21,7 @@ const NAV_ITEMS = [
     { name: 'Submit Claim', href: '/submit', icon: PlusCircle },
     { name: 'Search Knowledge', href: '/search', icon: Search },
     { name: 'Alerts', href: '/alerts', icon: ShieldAlert },
-    { name: 'Agent Status', href: '/status', icon: Activity },
-    { name: 'Human Review', href: '/review', icon: Users },
+    { name: 'Human Review', href: '/human-review', icon: Users },
     { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

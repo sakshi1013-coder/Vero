@@ -11,10 +11,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Submit Claim Widget State
   const [submitText, setSubmitText] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<ClaimData | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const handleVerify = async () => {
     if (!submitText.trim()) return;
@@ -37,6 +37,7 @@ export default function Home() {
       const data = await fetchClaims();
       if (data.length > 0) {
         setClaims(data);
+        setLastUpdated(new Date());
       } else {
         setError('No claims returned from the agent. Try refreshing.');
       }
@@ -50,6 +51,13 @@ export default function Home() {
 
   useEffect(() => {
     loadClaims();
+
+    // Auto-refresh every 30 seconds for real-time updates
+    const intervalId = setInterval(() => {
+      loadClaims();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -179,8 +187,29 @@ export default function Home() {
               marginBottom: '1.5rem',
             }}>
               <div>
-                <h2 style={{ marginBottom: '0.25rem' }}>Live Verification Feed</h2>
-                <p className="text-secondary text-sm">Real-time analysis from trusted sources</p>
+                <h2 style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  Live Verification Feed
+                  <span className="animate-pulse" style={{
+                    background: 'var(--danger)',
+                    color: 'white',
+                    fontSize: '0.6rem',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    LIVE
+                  </span>
+                </h2>
+                <p className="text-secondary text-sm">
+                  Real-time analysis from trusted sources
+                  {lastUpdated && (
+                    <span style={{ marginLeft: '0.5rem', color: 'var(--text-muted)' }}>
+                      • Last updated: {lastUpdated.toLocaleTimeString()}
+                    </span>
+                  )}
+                </p>
               </div>
               <button
                 onClick={loadClaims}
@@ -294,7 +323,45 @@ export default function Home() {
                         {verificationResult.verdict}
                       </span>
                     </div>
-                    <p className="text-sm" style={{ marginBottom: '0.5rem' }}>{verificationResult.summary}</p>
+
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+                      &ldquo;{verificationResult.claim}&rdquo;
+                    </h4>
+
+                    <p className="text-sm" style={{ marginBottom: '0.75rem' }}>{verificationResult.summary}</p>
+
+                    {/* Sources for Verification Result */}
+                    {verificationResult.sources && verificationResult.sources.length > 0 && (
+                      <div style={{ marginBottom: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+                        <div className="text-xs text-muted" style={{ marginBottom: '0.5rem', fontWeight: '600' }}>SOURCES</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {verificationResult.sources.map((source, idx) => (
+                            <a
+                              key={idx}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                color: 'var(--accent)',
+                                textDecoration: 'none'
+                              }}
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                              </svg>
+                              {source.name}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="text-xs text-muted">Confidence: {Math.round(verificationResult.confidence_score * 100)}%</div>
                   </div>
                   <button
@@ -319,17 +386,28 @@ export default function Home() {
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }}></div>
-                  <span>Monitoring 38 sources...</span>
+                  <div className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }}></div>
+                  <span>Monitoring {claims.reduce((acc, claim) => acc + claim.sources.length, 0)} sources...</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)' }}></div>
-                  <span>Extracting claims...</span>
+                  <div className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', animationDelay: '0.2s' }}></div>
+                  <span>Tracking {claims.length} active claims...</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--warning)' }}></div>
-                  <span>Verifying with Gov data...</span>
+                  <div className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--warning)', animationDelay: '0.4s' }}></div>
+                  <span>Auto-refresh: Every 30s</span>
                 </div>
+                {lastUpdated && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid var(--border)',
+                    fontSize: '0.75rem',
+                    color: 'var(--text-muted)'
+                  }}>
+                    Next update: {new Date(lastUpdated.getTime() + 30000).toLocaleTimeString()}
+                  </div>
+                )}
               </div>
             </div>
           </aside>
